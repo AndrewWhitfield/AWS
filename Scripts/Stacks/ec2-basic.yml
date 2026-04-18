@@ -1,0 +1,15 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Resources: 
+  MyEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-01b14b7ad41e17ba4
+      InstanceType: t2.micro
+
+Outputs:
+  MyEC2InstanceOutput:
+    Description: "Instance ID"
+    Value: !Ref MyEC2Instance
+    Export: 
+      Name: "MyEC2Instance"
