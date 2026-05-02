@@ -1,0 +1,117 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  3-Tier Prototype - API Gateway + Lambda + DynamoDB
+
+Globals:
+  Function:
+    Timeout: 10
+    MemorySize: 128
+    Runtime: python3.12
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref AppTable
+        ALLOWED_ORIGIN: !Sub "http://${FrontendBucket}.s3-website-${AWS::Region}.amazonaws.com"
+
+Resources:
+
+  # ─── DynamoDB Table ───────────────────────────────────────────────────────
+  AppTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: app-table
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+
+  # ─── Lambda Function ──────────────────────────────────────────────────────
+  AppFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: app-handler
+      CodeUri: src/
+      Handler: handler.lambda_handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AppTable
+      Events:
+        GetItems:
+          Type: Api
+          Properties:
+            RestApiId: !Ref AppApi
+            Path: /items
+            Method: GET
+        GetItem:
+          Type: Api
+          Properties:
+            RestApiId: !Ref AppApi
+            Path: /items/{id}
+            Method: GET
+        CreateItem:
+          Type: Api
+          Properties:
+            RestApiId: !Ref AppApi
+            Path: /items
+            Method: POST
+        DeleteItem:
+          Type: Api
+          Properties:
+            RestApiId: !Ref AppApi
+            Path: /items/{id}
+            Method: DELETE
+
+  # ─── API Gateway ──────────────────────────────────────────────────────────
+  AppApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: app-api
+      StageName: dev
+      Cors:
+        AllowMethods: "'GET,POST,DELETE,OPTIONS'"
+        AllowHeaders: "'Content-Type'"
+        AllowOrigin: !Sub "'http://${FrontendBucket}.s3-website-${AWS::Region}.amazonaws.com'"
+
+  # ─── S3 Frontend Bucket ───────────────────────────────────────────────────
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "my-prototype-frontend-${AWS::AccountId}"
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+
+  FrontendBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FrontendBucket
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal: "*"
+            Action: s3:GetObject
+            Resource: !Sub "arn:aws:s3:::${FrontendBucket}/*"
+
+# ─── Outputs ────────────────────────────────────────────────────────────────
+Outputs:
+  ApiUrl:
+    Description: API Gateway endpoint URL
+    Value: !Sub "https://${AppApi}.execute-api.${AWS::Region}.amazonaws.com/dev"
+  WebsiteUrl:
+    Description: S3 static website URL
+    Value: !Sub "http://${FrontendBucket}.s3-website-${AWS::Region}.amazonaws.com"
+  TableName:
+    Description: DynamoDB table name
+    Value: !Ref AppTable

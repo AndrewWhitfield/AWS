@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+
+# Environment variables
+.env
+
+# Frontend build output
+node_modules/
+dist/
+
+# SAM build output
+.aws-sam/
+
+package-lock.json
