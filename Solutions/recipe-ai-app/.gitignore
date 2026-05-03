@@ -1,0 +1,12 @@
+# macOS
+.DS_Store
+
+# Generated deployment artifacts
+frontend/api-url.txt
+frontend/api_url.txt
+backend/function.zip
+
+# Temporary IAM policy files written by scripts
+/tmp/trust-policy.json
+/tmp/permissions-policy.json
+/tmp/bucket-policy.json

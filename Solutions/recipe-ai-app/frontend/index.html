@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🍳 AI Recipe Suggester</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>🍳 AI Recipe Suggester</h1>
+      <p>Enter the ingredients you have, and let AI suggest recipes for you!</p>
+    </header>
+
+    <main>
+      <!-- Input Section -->
+      <section class="card" id="input-section">
+        <h2>Your Ingredients</h2>
+        <div class="ingredient-input-row">
+          <input
+            type="text"
+            id="ingredient-input"
+            placeholder="e.g. chicken, garlic, lemon..."
+            maxlength="50"
+          />
+          <button id="add-btn" onclick="addIngredient()">Add</button>
+        </div>
+        <div id="ingredient-tags" class="tags-container"></div>
+        <button id="suggest-btn" onclick="getSuggestions()" disabled>
+          ✨ Suggest Recipes
+        </button>
+      </section>
+
+      <!-- Loading State -->
+      <section class="card hidden" id="loading-section">
+        <div class="loader"></div>
+        <p>Our AI chef is thinking...</p>
+      </section>
+
+      <!-- Results Section -->
+      <section class="card hidden" id="results-section">
+        <h2>🍽️ Recipe Suggestions</h2>
+        <div id="recipe-output"></div>
+        <button onclick="resetForm()" class="secondary-btn">
+          🔄 Try Different Ingredients
+        </button>
+      </section>
+
+      <!-- History Section -->
+      <section class="card" id="history-section">
+        <div class="history-header">
+          <h2>📜 Recent Searches</h2>
+          <button onclick="loadHistory()" class="small-btn">Refresh</button>
+        </div>
+        <div id="history-list">
+          <p class="empty-state">No history yet. Generate your first recipe!</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
